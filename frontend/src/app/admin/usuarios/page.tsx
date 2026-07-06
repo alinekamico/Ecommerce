@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
+import PasswordInput from "@/components/PasswordInput";
 
 type Usuario = {
   id: number;
@@ -152,12 +153,11 @@ export default function UsuariosPage() {
                   onChange={(e) => setForm({ ...form, department: e.target.value })}
                   className="rounded-md border border-kami-gray px-3 py-2 text-sm text-kami-dark outline-none focus:border-kami-red"
                 />
-                <input
+                <PasswordInput
                   required
-                  type="password"
                   placeholder="Senha provisória"
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(value) => setForm({ ...form, password: value })}
                   className="rounded-md border border-kami-gray px-3 py-2 text-sm text-kami-dark outline-none focus:border-kami-red"
                 />
                 <select

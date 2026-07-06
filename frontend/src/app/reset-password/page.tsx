@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function ResetPasswordPage() {
   const [token, setToken] = useState<string | null>(null);
@@ -67,20 +68,18 @@ export default function ResetPasswordPage() {
           </>
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-            <input
-              type="password"
+            <PasswordInput
               required
               placeholder="Nova senha"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
               className="rounded-md border border-kami-gray px-3 py-2 text-kami-dark outline-none focus:border-kami-red"
             />
-            <input
-              type="password"
+            <PasswordInput
               required
               placeholder="Confirmar nova senha"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={setConfirmPassword}
               className="rounded-md border border-kami-gray px-3 py-2 text-kami-dark outline-none focus:border-kami-red"
             />
 
