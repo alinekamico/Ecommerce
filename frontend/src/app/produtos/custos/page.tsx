@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import * as XLSX from "xlsx";
 import AppShell from "@/components/AppShell";
 
 type Resultado = {
@@ -25,6 +26,33 @@ export default function CustosPage() {
   const [resultados, setResultados] = useState<Resultado[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState("");
+
+  const resultadosFiltrados = useMemo(() => {
+    const termo = filtro.trim().toLowerCase();
+    if (!termo) return resultados;
+    return resultados.filter((r) =>
+      [r.sku, r.marca, r.descricao].some((campo) => campo?.toLowerCase().includes(termo))
+    );
+  }, [resultados, filtro]);
+
+  function handleExportar() {
+    const linhas = resultadosFiltrados.map((r) => ({
+      SKU: r.sku,
+      Marca: r.marca ?? "",
+      Descrição: r.descricao ?? "",
+      Peso: r.peso ?? "",
+      Custo: r.custo ?? "",
+      "Preço Sugerido": r.preco_sugerido ?? "",
+      "Custo Médio": r.custo_medio ?? "",
+      "Estoque Barueri": r.estoque_barueri ?? "",
+      Erro: r.erro ?? "",
+    }));
+    const planilha = XLSX.utils.json_to_sheet(linhas);
+    const livro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(livro, planilha, "Custos");
+    XLSX.writeFile(livro, `custos-tiny-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -96,7 +124,24 @@ export default function CustosPage() {
         </form>
 
         {resultados.length > 0 && (
-          <div className="mt-8 overflow-x-auto rounded-lg border border-kami-gray bg-white">
+          <>
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+              <input
+                type="text"
+                value={filtro}
+                onChange={(e) => setFiltro(e.target.value)}
+                placeholder="Filtrar por SKU, marca ou descrição..."
+                className="w-full max-w-xs rounded-md border border-kami-gray bg-white px-3 py-2 text-sm text-kami-dark outline-none focus:border-kami-red"
+              />
+              <button
+                onClick={handleExportar}
+                className="rounded-md border border-kami-gray bg-white px-4 py-2 text-sm font-medium text-kami-dark transition-colors hover:border-kami-red hover:text-kami-red"
+              >
+                Exportar Excel
+              </button>
+            </div>
+
+          <div className="mt-3 overflow-x-auto rounded-lg border border-kami-gray bg-white">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-kami-gray bg-kami-cream text-kami-dark">
@@ -111,7 +156,7 @@ export default function CustosPage() {
                 </tr>
               </thead>
               <tbody>
-                {resultados.map((r) => (
+                {resultadosFiltrados.map((r) => (
                   <tr key={r.sku} className="border-b border-kami-gray/50 last:border-0">
                     <td className="px-3 py-2 font-medium text-kami-dark">{r.sku}</td>
                     {r.encontrado ? (
@@ -134,6 +179,7 @@ export default function CustosPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </div>
